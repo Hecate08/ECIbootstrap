@@ -1,4 +1,4 @@
-Package: bootstrapECI
+Package: ECIbootstrap
 Type: Package
 Title: ECI Bootstrap Test
 Version: 0.1.0
