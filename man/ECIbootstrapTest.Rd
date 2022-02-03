@@ -33,7 +33,7 @@ The function returns a list with the returned values for the raw data analysis (
 This function performs a molecular equivalence test based on the ECI statistic using a bootstrapt test.
 }
 \examples{
-library(truncnorm)
+set.seed(45)
 # generate sample data
 sample1 <- data.frame(ID = seq(1,10),Type = rep(c("normal","tumor"), each = 5))
 sample2 <- data.frame(ID = seq(1,10),Type = rep(c("normal","tumor"), each = 5))
@@ -46,8 +46,8 @@ colnames(data1) <- seq(1,10)
 colnames(data2) <- seq(1,10)
 
 for(i in 1:5){
-  data1[i,] = c(rtruncnorm(5,a=0,b=Inf,mean = 3,sd=1),rtruncnorm(5,a=0,b=Inf,mean = 4,sd=1))
-  data2[i,] = c(rtruncnorm(5,a=0,b=Inf,mean = 3,sd=1),rtruncnorm(5,a=0,b=Inf,mean = 3.75,sd=1))
+  data1[i,] = c(rnorm(5,mean = 3,sd=1),rnorm(5,mean = 4,sd=1))
+  data2[i,] = c(rnorm(5,mean = 3,sd=1),rnorm(5,mean = 3.75,sd=1))
 }
 
 # perform ECI bootstrap test

@@ -1,18 +1,30 @@
 ###########
 # ECI
 
+#' Bootstrap p-value
+#'
+#' This function calculates an approximate p-value for a bootstrapped value based on BCa confidence interval.
+#'
+#' @param data A named vector of ECI values
+#' @return The p-value based on BCa confidence interval
 #' @export
 bootstrap.pval <- function(data){
   B = 1000
   pE <- mean(data)
   N = sum(data < pE)
   M = sum(data < 0 )
-  alpha1 = pnorm(-2*qnorm(N/B) + qnorm(M/B))
+  alpha1 = stats::pnorm(-2*qnorm(N/B) + stats::qnorm(M/B))
   if(pE < 0) alpha1 = 1 - alpha1
   alpha = 2*alpha1
   return(alpha)
 }
 
+#' Bootstrap q-value
+#'
+#' This function calculates q-values for p-values from multiple ECI bootstrap tests
+#'
+#' @param pval A named vector of p-values
+#' @return A vector of q-values
 #' @export
 bootstrap.qval <- function(pval){
   sortP <- sort(pval)
@@ -42,7 +54,7 @@ bootstrap.qval <- function(pval){
 #' @return The function returns a list with the returned values for the raw data analysis (e.g. differential gene expression analysis) for both studies and a matrix with the results for the ECI bootstrap test with ECI values, the Bca confidence interval, p-pvalue, and q-value of each ECI value. 
 #' @export
 #' @examples 
-#' library(truncnorm)
+#' set.seed(45)
 #' # generate sample data
 #' sample1 <- data.frame(ID = seq(1,10),Type = rep(c("normal","tumor"), each = 5))
 #' sample2 <- data.frame(ID = seq(1,10),Type = rep(c("normal","tumor"), each = 5))
@@ -55,8 +67,8 @@ bootstrap.qval <- function(pval){
 #' colnames(data2) <- seq(1,10)
 #' 
 #' for(i in 1:5){
-#'   data1[i,] = c(rtruncnorm(5,a=0,b=Inf,mean = 3,sd=1),rtruncnorm(5,a=0,b=Inf,mean = 4,sd=1))
-#'   data2[i,] = c(rtruncnorm(5,a=0,b=Inf,mean = 3,sd=1),rtruncnorm(5,a=0,b=Inf,mean = 3.75,sd=1))
+#'   data1[i,] = c(rnorm(5,mean = 3,sd=1),rnorm(5,mean = 4,sd=1))
+#'   data2[i,] = c(rnorm(5,mean = 3,sd=1),rnorm(5,mean = 3.75,sd=1))
 #' }
 #' 
 #' # perform ECI bootstrap test
@@ -69,7 +81,7 @@ ECIbootstrapTest <- function(data1,data2,targets1,targets2, alpha = 0.05, analys
   ES_list2 <- analysisFunc(data2,targets2)
   
   #get beta values and pvalues from both studies
-  beta1 = ES_list1$Es
+  beta1 = ES_list1$ES
   beta2 = ES_list2$ES
   pval1 = ES_list1$pval
   pval2 = ES_list2$pval
