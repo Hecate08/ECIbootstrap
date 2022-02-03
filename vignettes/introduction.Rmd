@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(bootstrapECI)
+library(ECIbootstrap)
 ```
 
 # ECI bootstrap test
@@ -40,6 +40,7 @@ study1$geneExpr[1:6,1:6]
 To perform the boostrap test we provide the sample information, the raw gene expression values and the function to analyze the data to the ECIboostrapTest function
 
 ```{r}
+#ECIbootstrapTest
 results <- ECIbootstrapTest(data1 = study1$geneExpr, data2 = study2$geneExpr,
                             targets1 = study1$samples, targets2 = study2$samples,
                             analysisFunc = diffExpr)
