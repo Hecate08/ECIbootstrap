@@ -17,3 +17,36 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(bootstrapECI)
 ```
+
+# ECI bootstrap test
+In the following we will give an easy example on how to use the ECI bootstrap test to perform equivalence tests on molecular data such as differential gene expression data. The package expects raw molecular data (e.g. gene expression values) as input as well as information about the subjects (two groups) and a function to analyse the raw data such as differential gene expression.  
+
+Here, we present an expample for differential gene expression. We simulated two diverse gene expression studies of 1000 genes and each of the studies has 20 subjects in the control group as well as the case group. To load the data just use below code:
+
+```{r}
+study1 <- readRDS(system.file("extdata", "study1.rds", package = "ECIbootstrap"))
+study2 <- readRDS(system.file("extdata", "study2.rds", package = "ECIbootstrap"))
+```
+
+Investigating the data shows that each study has two matricies: one matrix for the information about the sampless of the study in form of ID and Type or the sample, and another matrix with gene expression values where the rows represent the genes and the columns represent the samples. It is important that the two matricies follow the same order of samples.
+
+```{r}
+# sample information
+head(study1$samples)
+# gene expression values
+study1$geneExpr[1:6,1:6]
+```
+
+To perform the boostrap test we provide the sample information, the raw gene expression values and the function to analyze the data to the ECIboostrapTest function
+
+```{r}
+results <- ECIbootstrapTest(data1 = study1$geneExpr, data2 = study2$geneExpr,
+                            targets1 = study1$samples, targets2 = study2$samples,
+                            analysisFunc = diffExpr)
+results$EffectSize1[1:6,]
+results$EffectSize2[1:6,]
+results$ECIboostrap[1:6,]
+
+```
+
+The function returns a list with the returned values for the raw data analysis (e.g. differential gene expression analysis) for both studies and a matrix with the results for the ECI bootstrap test with ECI values, the Bca confidence interval, p-pvalue, and q-value of each ECI value. 

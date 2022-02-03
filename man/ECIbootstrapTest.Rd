@@ -4,24 +4,33 @@
 \alias{ECIbootstrapTest}
 \title{ECI bootstrap test}
 \usage{
-ECIbootstrapTest(data1, data2, targets1, targets2, filter = TRUE, alpha = 0.05)
+ECIbootstrapTest(
+  data1,
+  data2,
+  targets1,
+  targets2,
+  filter = FALSE,
+  alpha = 0.05,
+  analysisFunc = diffExpr
+)
 }
 \arguments{
+\item{data1}{A gene expression matrix with genes as rows and subjects as columns.}
+
+\item{data2}{A gene expression matrix with genes as rows and subjects as columns.}
+
 \item{targets1}{A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".}
 
 \item{targets2}{A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".}
 
-\item{filter}{A boolean parameter indicating if the returned values should by filtered by genes expressing}
+\item{filter}{A boolean parameter indicating if the returned values should by filtered by genes expressing being differentially expressed in at least one of the studies.}
 
-\item{alpha}{Significance level for the confidence interval.
-being differentially expressed in at least one of the studies.}
+\item{alpha}{Significance level for the confidence interval.}
 
-\item{geneExpr1}{A gene expression matrix with genes as rows and subjects as columns.}
-
-\item{geneExpr2}{A gene expression matrix with genes as rows and subjects as columns.}
+\item{analysisFunc}{Function to analyze the data}
 }
 \value{
-A matrix of ECI values, confidence interval, p value, and q value.
+The function returns a list with the returned values for the raw data analysis (e.g. differential gene expression analysis) for both studies and a matrix with the results for the ECI bootstrap test with ECI values, the Bca confidence interval, p-pvalue, and q-value of each ECI value.
 }
 \description{
 This function performs a molecular equivalence test based on the ECI statistic using a bootstrapt test.
