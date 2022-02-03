@@ -33,13 +33,12 @@ bootstrap.qval <- function(pval){
 #'
 #' This function performs a molecular equivalence test based on the ECI statistic using a bootstrapt test.
 #'
-#' @param data1 A gene expression matrix with genes as rows and subjects as columns.
-#' @param data2 A gene expression matrix with genes as rows and subjects as columns.
+#' @param data1 A matrix with attributes (e.g. genes) as rows and subjects as columns.
+#' @param data2 A matrix with attributes (e.g. genes) as rows and subjects as columns.
 #' @param targets1 A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".
 #' @param targets2 A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".
-#' @param filter A boolean parameter indicating if the returned values should by filtered by genes expressing being differentially expressed in at least one of the studies.
 #' @param alpha Significance level for the confidence interval.
-#' @param analysisFunc Function to analyze the data
+#' @param analysisFunc Function to analyze the data. Should return "ES" (e.g. log2FC) and "pval" as columns of a matrix
 #' @return The function returns a list with the returned values for the raw data analysis (e.g. differential gene expression analysis) for both studies and a matrix with the results for the ECI bootstrap test with ECI values, the Bca confidence interval, p-pvalue, and q-value of each ECI value. 
 #' @export
 #' @examples 
@@ -63,15 +62,15 @@ bootstrap.qval <- function(pval){
 #' # perform ECI bootstrap test
 #' ECIbootstrat <- ECIbootstrapTest(data1,data2,sample1,sample2)
 
-ECIbootstrapTest <- function(data1,data2,targets1,targets2, filter = FALSE, alpha = 0.05, analysisFunc = diffExpr){
+ECIbootstrapTest <- function(data1,data2,targets1,targets2, alpha = 0.05, analysisFunc = diffExpr){
   
   # differential gene expression
   ES_list1 <- analysisFunc(data1,targets1)
   ES_list2 <- analysisFunc(data2,targets2)
   
   #get beta values and pvalues from both studies
-  beta1 = ES_list1$log2FC
-  beta2 = ES_list2$log2FC
+  beta1 = ES_list1$Es
+  beta2 = ES_list2$ES
   pval1 = ES_list1$pval
   pval2 = ES_list2$pval
   names(beta1) = rownames(ES_list1)
@@ -109,8 +108,8 @@ ECIbootstrapTest <- function(data1,data2,targets1,targets2, filter = FALSE, alph
     ES_list_B2 = analysisFunc(data2new,targets2new)
     
     #ECI
-    beta_B1 = ES_list_B1$log2FC
-    beta_B2 = ES_list_B2$log2FC
+    beta_B1 = ES_list_B1$ES
+    beta_B2 = ES_list_B2$ES
     pval_B1 = ES_list_B1$pval
     pval_B2 = ES_list_B2$pval
     names(beta_B1) = rownames(ES_list_B1)
@@ -121,26 +120,20 @@ ECIbootstrapTest <- function(data1,data2,targets1,targets2, filter = FALSE, alph
     bootstrap[,i] <- ECEA::getECI(beta_B1,beta_B2,pval_B1,pval_B2)
   }
 
-  #confidence intervals
+  #confidence intervals, pvalue, and qvalue
   CI <- matrix(NA,ncol = 2, nrow = len)
   pval <- c()
   for(i in 1:len){
     CI[i,] <- coxed::bca(bootstrap[i,], conf.level = 1-alpha)
     pval[i] <- bootstrap.pval(bootstrap[i,])
   }
+  names(pval) <- rownames(ES_list1)
+  qvalue <- bootstrap.qval(pval)
+  qvalue <- qvalue[names(pval)]
 
-  result <- data.frame(ECI = eci, CI.LL = CI[,1], CI.UL = CI[,2], p_value = pval)
+  # merging results
+  result <- data.frame(ECI = eci, CI.LL = CI[,1], CI.UL = CI[,2], p_value = pval, q_value = qvalue)
   rownames(result) <- rownames(ES_list1)
-
-  # output only those ECI where at least one of the genes has abs(log2FC) > 1 and pval < 0.05
-  if(filter){
-    result <- result[(abs(ES_list1$log2FC) > 1 & ES_list1$pval < 0.05) | (abs(ES_list2$log2FC) > 1 & ES_list2$pval < 0.05),]
-  }
-  p <- result$p_value
-  names(p) <- rownames(result)
-  qvalue <- bootstrap.qval(p)
-  qvalue <- qvalue[names(p)]
-  result$q_value <- qvalue
   
   result_list <- list(EffectSize1 = ES_list1, EffectSize2 = ES_list2, ECIboostrap = result)
   return(result_list)
