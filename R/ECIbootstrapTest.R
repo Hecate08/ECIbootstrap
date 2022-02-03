@@ -33,26 +33,30 @@ bootstrap.qval <- function(pval){
 #'
 #' This function performs a molecular equivalence test based on the ECI statistic using a bootstrapt test.
 #'
-#' @param gene_list1 A matrix of differential gene expression values for the first study
-#' @param gene_list2 A matrix of differential gene expression values for the second study
 #' @param geneExpr1 A gene expression matrix with genes as rows and subjects as columns.
 #' @param geneExpr2 A gene expression matrix with genes as rows and subjects as columns.
 #' @param targets1 A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".
 #' @param targets2 A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".
 #' @param filter A boolean parameter indicating if the returned values should by filtered by genes expressing
+#' @param alpha Significance level for the confidence interval.
 #' being differentially expressed in at least one of the studies.
 #' @return A matrix of ECI values, confidence interval, p value, and q value.
 #' @export
-ECIbootstrapTest <- function(gene_list1,gene_list2, geneExpr1,geneExpr2,targets1,targets2, filter = TRUE){
+ECIbootstrapTest <- function(data1,data2,targets1,targets2, filter = TRUE, alpha = 0.05){
+  
+  # differential gene expression
+  ES_list1 <- diffExpr(data1,targets1)
+  ES_list2 <- diffExpr(data2,targets2)
+  
   #get beta values and pvalues from both studies
-  beta1 = gene_list1$log2FC
-  names(beta1) = rownames(gene_list1)
-  pval1 = gene_list1$pval
-  names(pval1) = rownames(gene_list1)
-  beta2 = gene_list2$log2FC
-  names(beta2) = rownames(gene_list2)
-  pval2 = gene_list2$pval
-  names(pval2) = rownames(gene_list2)
+  beta1 = ES_list1$log2FC
+  beta2 = ES_list2$log2FC
+  pval1 = ES_list1$pval
+  pval2 = ES_list2$pval
+  names(beta1) = rownames(ES_list1)
+  names(beta2) = rownames(ES_list2)
+  names(pval1) = rownames(ES_list1)
+  names(pval2) = rownames(ES_list2)
 
   #get eci for all genes
   eci <- ECEA::getECI(beta1,beta2,pval1,pval2)
@@ -73,25 +77,26 @@ ECIbootstrapTest <- function(gene_list1,gene_list2, geneExpr1,geneExpr2,targets1
     #}
     #Bootstrap sampling
     new1 = c(sample(group1,length(group1),replace = TRUE),sample(group2,length(group2),replace = TRUE))
-    targets1new = targets1[new1,]
-    geneExpr1new = geneExpr1[,new1]
     new2 = c(sample(group3,length(group3),replace = TRUE),sample(group4,length(group4),replace = TRUE))
+    targets1new = targets1[new1,]
     targets2new = targets2[new2,]
-    geneExpr2new = geneExpr2[,new2]
+    data1new = data1[,new1]
+    data2new = data2[,new2]
+    
     #diff gene expression
-    gene_list_B1 = diffExpr(geneExpr1new,targets1new)
-    gene_list_B2 = diffExpr(geneExpr2new,targets2new)
+    ES_list_B1 = diffExpr(data1new,targets1new)
+    ES_list_B2 = diffExpr(data2new,targets2new)
+    
     #ECI
-    beta_B1 = gene_list_B1$log2FC
-    names(beta_B1) = rownames(gene_list_B1)
-    pval_B1 = gene_list_B1$pval
-    names(pval_B1) = rownames(gene_list_B1)
-    beta_B2 = gene_list_B2$log2FC
-    names(beta_B2) = rownames(gene_list_B2)
-    pval_B2 = gene_list_B2$pval
-    names(pval_B2) = rownames(gene_list_B2)
+    beta_B1 = ES_list_B1$log2FC
+    beta_B2 = ES_list_B2$log2FC
+    pval_B1 = ES_list_B1$pval
+    pval_B2 = ES_list_B2$pval
+    names(beta_B1) = rownames(ES_list_B1)
+    names(beta_B2) = rownames(ES_list_B2)
+    names(pval_B1) = rownames(ES_list_B1)
+    names(pval_B2) = rownames(ES_list_B2)
 
-    #get eci for all genes
     bootstrap[,i] <- ECEA::getECI(beta_B1,beta_B2,pval_B1,pval_B2)
   }
 
@@ -99,12 +104,12 @@ ECIbootstrapTest <- function(gene_list1,gene_list2, geneExpr1,geneExpr2,targets1
   CI <- matrix(NA,ncol = 2, nrow = len)
   pval <- c()
   for(i in 1:len){
-    CI[i,] <- coxed::bca(bootstrap[i,], conf.level = 0.95)
+    CI[i,] <- coxed::bca(bootstrap[i,], conf.level = 1-alpha)
     pval[i] <- bootstrap.pval(bootstrap[i,])
   }
 
   result <- data.frame(ECI = eci, CI.LL = CI[,1], CI.UL = CI[,2], p_value = pval)
-  rownames(result) <- rownames(gene_list1)
+  rownames(result) <- rownames(ES_list1)
 
   # output only those ECI where at least one of the genes has abs(log2FC) > 1 and pval < 0.05
   if(filter){

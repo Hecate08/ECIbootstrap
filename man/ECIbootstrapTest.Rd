@@ -4,31 +4,21 @@
 \alias{ECIbootstrapTest}
 \title{ECI bootstrap test}
 \usage{
-ECIbootstrapTest(
-  gene_list1,
-  gene_list2,
-  geneExpr1,
-  geneExpr2,
-  targets1,
-  targets2,
-  filter = TRUE
-)
+ECIbootstrapTest(data1, data2, targets1, targets2, filter = TRUE, alpha = 0.05)
 }
 \arguments{
-\item{gene_list1}{A matrix of differential gene expression values for the first study}
-
-\item{gene_list2}{A matrix of differential gene expression values for the second study}
-
-\item{geneExpr1}{A gene expression matrix with genes as rows and subjects as columns.}
-
-\item{geneExpr2}{A gene expression matrix with genes as rows and subjects as columns.}
-
 \item{targets1}{A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".}
 
 \item{targets2}{A data.frame of subject "ID" and "Type" as columns. "Type" has to be "normal" or "tumor".}
 
-\item{filter}{A boolean parameter indicating if the returned values should by filtered by genes expressing
+\item{filter}{A boolean parameter indicating if the returned values should by filtered by genes expressing}
+
+\item{alpha}{Significance level for the confidence interval.
 being differentially expressed in at least one of the studies.}
+
+\item{geneExpr1}{A gene expression matrix with genes as rows and subjects as columns.}
+
+\item{geneExpr2}{A gene expression matrix with genes as rows and subjects as columns.}
 }
 \value{
 A matrix of ECI values, confidence interval, p value, and q value.
