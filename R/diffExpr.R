@@ -20,9 +20,8 @@ diffExpr <- function(data, targets){
   # getting sd
   beta <- fit$coefficients[,2]
   pval <- fit$p.value[,2]
-  #sigma <- sqrt(fit$s2.post)
   sd <- ((sqrt(fit$s2.post)) * (fit$stdev.unscaled))[,2]
-  gene_list <- data.frame(log2FC = beta, pval = pval, sd = sd, df = fit$df.total)
+  gene_list <- data.frame(log2FC = beta, pval = pval, sd = sd)
 
   return(gene_list)
 }

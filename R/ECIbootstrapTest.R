@@ -42,6 +42,27 @@ bootstrap.qval <- function(pval){
 #' @param analysisFunc Function to analyze the data
 #' @return The function returns a list with the returned values for the raw data analysis (e.g. differential gene expression analysis) for both studies and a matrix with the results for the ECI bootstrap test with ECI values, the Bca confidence interval, p-pvalue, and q-value of each ECI value. 
 #' @export
+#' @examples 
+#' library(truncnorm)
+#' # generate sample data
+#' sample1 <- data.frame(ID = seq(1,10),Type = rep(c("normal","tumor"), each = 5))
+#' sample2 <- data.frame(ID = seq(1,10),Type = rep(c("normal","tumor"), each = 5))
+#' 
+#' data1 <- matrix(NA,nrow = 5,ncol = 10)
+#' data2 <- matrix(NA,nrow = 5,ncol = 10)
+#' rownames(data1) <- seq(1,5)
+#' rownames(data2) <- seq(1,5)
+#' colnames(data1) <- seq(1,10)
+#' colnames(data2) <- seq(1,10)
+#' 
+#' for(i in 1:5){
+#'   data1[i,] = c(rtruncnorm(5,a=0,b=Inf,mean = 3,sd=1),rtruncnorm(5,a=0,b=Inf,mean = 4,sd=1))
+#'   data2[i,] = c(rtruncnorm(5,a=0,b=Inf,mean = 3,sd=1),rtruncnorm(5,a=0,b=Inf,mean = 3.75,sd=1))
+#' }
+#' 
+#' # perform ECI bootstrap test
+#' ECIbootstrat <- ECIbootstrapTest(data1,data2,sample1,sample2)
+
 ECIbootstrapTest <- function(data1,data2,targets1,targets2, filter = FALSE, alpha = 0.05, analysisFunc = diffExpr){
   
   # differential gene expression
