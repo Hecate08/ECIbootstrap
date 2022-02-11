@@ -6,12 +6,11 @@ Author: Lisa Neums
 Maintainer: Lisa Neums <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: MIT License
+License: MIT License + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
     limma,
-    ECEA,
     coxed
 RoxygenNote: 7.1.2
 Suggests: 

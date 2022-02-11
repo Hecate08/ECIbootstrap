@@ -91,7 +91,7 @@ ECIbootstrapTest <- function(data1,data2,targets1,targets2, alpha = 0.05, analys
   names(pval2) = rownames(ES_list2)
 
   #get eci for all genes
-  eci <- ECEA::getECI(beta1,beta2,pval1,pval2)
+  eci <- getECI(beta1,beta2,pval1,pval2)
 
   n <- 1000
   len <- dim(ES_list1)[1]
@@ -129,7 +129,7 @@ ECIbootstrapTest <- function(data1,data2,targets1,targets2, alpha = 0.05, analys
     names(pval_B1) = rownames(ES_list_B1)
     names(pval_B2) = rownames(ES_list_B2)
 
-    bootstrap[,i] <- ECEA::getECI(beta_B1,beta_B2,pval_B1,pval_B2)
+    bootstrap[,i] <- getECI(beta_B1,beta_B2,pval_B1,pval_B2)
   }
 
   #confidence intervals, pvalue, and qvalue

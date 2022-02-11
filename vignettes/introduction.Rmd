@@ -1,6 +1,6 @@
 ---
 title: "Introduction"
-output: rmarkdown::html_vignette
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{Introduction}
   %\VignetteEngine{knitr::rmarkdown}
@@ -37,7 +37,7 @@ head(study1$samples)
 study1$geneExpr[1:6,1:6]
 ```
 
-To perform the boostrap test we provide the sample information, the raw gene expression values and the function to analyze the data to the ECIboostrapTest function
+To perform the boostrap test we provide the sample information, the raw gene expression values and the function to analyze the data to the ECIboostrapTest function. In the presented example the gene expression values are derived from micro array expression data and are modified in a way that they are compatible with the limma R package for differential gene expression. The provided differential gene expression function uses limma to perform differential gene expression and returns the log2 fold change as variable "ES" and the p-value as variable "pval".
 
 ```{r}
 #ECIbootstrapTest
