@@ -10,8 +10,7 @@ License: MIT License + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-    limma,
-    coxed
+    limma
 RoxygenNote: 7.1.2
 Suggests: 
     rmarkdown,
