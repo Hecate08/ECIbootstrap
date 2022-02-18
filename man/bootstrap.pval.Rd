@@ -4,10 +4,12 @@
 \alias{bootstrap.pval}
 \title{Bootstrap p-value}
 \usage{
-bootstrap.pval(data)
+bootstrap.pval(data, ES)
 }
 \arguments{
-\item{data}{A named vector of ECI values}
+\item{data}{A named vector of bootstrapped ECI values}
+
+\item{ES}{the original ECI value}
 }
 \value{
 The p-value based on BCa confidence interval

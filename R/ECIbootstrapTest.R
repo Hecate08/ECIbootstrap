@@ -1,20 +1,56 @@
 ###########
 # ECI
 
+
+#' Bootstrap p-value
+#'
+#' This function calculates the BCa confidence interval. The function is adapted from the bca function of the coxed package.
+#'
+#' @param theta A named vector of bootstrapped ECI values
+#' @param theta_hat The original ECI value
+#' @param conf.level The confidence level for the confidence interval.
+#' @return The BCa confidence interval
+#' @export
+
+BCa <- function (theta, theta_hat, conf.level = 0.95) {
+  low <- (1 - conf.level)/2
+  high <- 1 - low
+  sims <- length(theta)
+  z.inv <- length(theta[theta < theta_hat])/sims
+  if(z.inv == 1){
+    z.inv <- 0.999
+  } else if(z.inv == 0){
+    z.inv <- 0.001
+  }
+  z <- qnorm(z.inv)
+  U <- (sims - 1) * (mean(theta, na.rm = TRUE) - theta)
+  top <- sum(U^3)
+  under <- 6 * (sum(U^2))^{
+    3/2
+  }
+  a <- top/under
+  lower.inv <- pnorm(z + (z + qnorm(low))/(1 - a * (z + qnorm(low))))
+  lower <- quantile(theta, lower.inv, names = FALSE)
+  upper.inv <- pnorm(z + (z + qnorm(high))/(1 - a * (z + qnorm(high))))
+  upper <- quantile(theta, upper.inv, names = FALSE)
+  return(c(lower, upper))
+}
+
+
 #' Bootstrap p-value
 #'
 #' This function calculates an approximate p-value for a bootstrapped value based on BCa confidence interval.
 #'
-#' @param data A named vector of ECI values
+#' @param data A named vector of bootstrapped ECI values
+#' @param ES the original ECI value
 #' @return The p-value based on BCa confidence interval
 #' @export
-bootstrap.pval <- function(data){
+bootstrap.pval <- function(data,ES){
   B = 1000
-  pE <- mean(data)
-  N = sum(data < pE)
+  N = sum(data < ES)
   M = sum(data < 0 )
-  alpha1 = stats::pnorm(-2*qnorm(N/B) + stats::qnorm(M/B))
-  if(pE < 0) alpha1 = 1 - alpha1
+  alpha1 = pnorm(-2*qnorm(N/B) + qnorm(M/B))
+  if(ES < 0) alpha1 = 1 - alpha1
   alpha = 2*alpha1
   return(alpha)
 }
@@ -136,8 +172,8 @@ ECIbootstrapTest <- function(data1,data2,targets1,targets2, alpha = 0.05, analys
   CI <- matrix(NA,ncol = 2, nrow = len)
   pval <- c()
   for(i in 1:len){
-    CI[i,] <- coxed::bca(bootstrap[i,], conf.level = 1-alpha)
-    pval[i] <- bootstrap.pval(bootstrap[i,])
+    CI[i,] <- BCa(bootstrap[i,], eci[i], conf.level = 1-alpha)
+    pval[i] <- bootstrap.pval(bootstrap[i,], eci[i])
   }
   names(pval) <- rownames(ES_list1)
   qvalue <- bootstrap.qval(pval)
