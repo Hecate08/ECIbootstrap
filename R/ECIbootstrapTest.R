@@ -2,7 +2,7 @@
 # ECI
 
 
-#' Bootstrap p-value
+#' Bootstrap BCa confidence interval
 #'
 #' This function calculates the BCa confidence interval. The function is adapted from the bca function of the coxed package.
 #'
@@ -16,19 +16,22 @@ BCa <- function (theta, theta_hat, conf.level = 0.95) {
   low <- (1 - conf.level)/2
   high <- 1 - low
   sims <- length(theta)
+  
+  # bias correction factor
   z.inv <- length(theta[theta < theta_hat])/sims
-  if(z.inv == 1){
-    z.inv <- 0.999
-  } else if(z.inv == 0){
-    z.inv <- 0.001
-  }
   z <- qnorm(z.inv)
-  U <- (sims - 1) * (mean(theta, na.rm = TRUE) - theta)
-  top <- sum(U^3)
-  under <- 6 * (sum(U^2))^{
-    3/2
+  
+  # acceleration factor
+  b_i <- c()
+  for(i in 1:sims){
+    b_i[i] <- sum(theta[-i])/(sims - 1)
   }
+  U <- (sims - 1) * (mean(theta, na.rm = TRUE) - b_i)
+  top <- sum(U^3)
+  under <- 6 * (sum(U^2))^{3/2}
   a <- top/under
+  
+  # confidence interval
   lower.inv <- pnorm(z + (z + qnorm(low))/(1 - a * (z + qnorm(low))))
   lower <- quantile(theta, lower.inv, names = FALSE)
   upper.inv <- pnorm(z + (z + qnorm(high))/(1 - a * (z + qnorm(high))))
